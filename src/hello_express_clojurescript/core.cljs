@@ -1,5 +1,6 @@
 (ns hello-express-clojurescript.core
-  (:require [cljs.nodejs :as node]))
+  (:require [cljs.nodejs :as node]
+            [hello-express-clojurescript.routes :as routes]))
 
 (node/enable-util-print!)
 
@@ -10,7 +11,6 @@
 (def cookieParser (node/require "cookie-parser"))
 (def bodyParser (node/require "body-parser"))
 (def app (express))
-(def routes (node/require "./routes"))
 (def http (node/require "http"))
 (def server (.createServer http app))
 (def debug ((node/require "debug") "hello-express:server"))
@@ -34,7 +34,7 @@
   (.use app (.json bodyParser))
   (.use app (.urlencoded bodyParser #js { :extended false }))
   (.use app (.static express (.join path js/__dirname "public")))
-  (.use app "/" routes)
+  (.use app "/" routes/router)
   (.use app (fn [req res next]
     (let [err (js/Error. "Not Found")]
       (set! (.-status err) 404)
