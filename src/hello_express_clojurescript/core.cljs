@@ -27,18 +27,19 @@
   (if-not (nil? (.-env.PORT node/process)) (.-env.PORT node/process) "3000")))
 
 (defn setup-express-config []
-  (.set app "port" port)
-  (.set app "views" (.join path js/__dirname "views"))
-  (.set app "view engine" "hbs")
-  (.use app (logger "dev"))
-  (.use app (.json bodyParser))
-  (.use app (.urlencoded bodyParser #js { :extended false }))
-  (.use app (.static express (.join path js/__dirname "public")))
-  (.use app "/" routes/router)
-  (.use app (fn [req res next]
-    (let [err (js/Error. "Not Found")]
-      (set! (.-status err) 404)
-      (next err)))))
+  (-> app
+    (.set "port" port)
+    (.set "views" (.join path js/__dirname "views"))
+    (.set "view engine" "hbs")
+    (.use (logger "dev"))
+    (.use (.json bodyParser))
+    (.use (.urlencoded bodyParser #js { :extended false }))
+    (.use (.static express (.join path js/__dirname "public")))
+    (.use "/" routes/router)
+    (.use (fn [req res next]
+      (let [err (js/Error. "Not Found")]
+        (set! (.-status err) 404)
+        (next err))))))
 
 (defn setup-error-handler []
   (.use app (fn [err req res next]
@@ -62,16 +63,17 @@
           (js/console.error (str bind " is already in use")))))))
 
 (defn server-listening-handler []
-  (let [addr (.address server)
-        bind (if (= (type addr) "string") (str "pipe" addr) (str "port" (.-port addr)))]
-    (debug (str "Listening on " bind))))
+   (let [addr (.address server)
+         bind (if (= (type addr) "string") (str "pipe" addr) (str "port" (.-port addr)))]
+     (debug (str "Listening on " bind))))
 
 (defn -main [& args]
-  (println "Starting up Express...")
+  (println (str "Starting up Express on http://localhost:" port))
   (setup-express-config)
   (setup-error-handler)
-  (.listen server port)
-  (.on server "error" server-error-handler)
-  (.on server "listening" server-listening-handler))
+  (-> server
+    (.listen port)
+    (.on "error" server-error-handler)
+    (.on "listening" server-listening-handler)))
 
 (set! *main-cli-fn* -main)

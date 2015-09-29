@@ -4,7 +4,8 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.7.0"]
-                 [org.clojure/clojurescript "1.7.122"]]
+                 [org.clojure/clojurescript "1.7.122"]
+                 [io.nervous/cljs-nodejs-externs "0.2.0"]]
   :plugins [[lein-cljsbuild "1.1.0"]
             [lein-npm "0.6.1"]]
   :source-paths ["src"]
@@ -16,13 +17,40 @@
                         [hbs "~3.1.0"]
                         [morgan "~1.6.1"]
                         [serve-favicon "~2.3.0"]]}
-  :cljsbuild {
-            :builds [{:id "server"
-                      :source-paths ["src/hello_express_clojurescript"]
-                      :compiler {:language-in :ecmascript5
-                                 :language-out :ecmascript5
-                                 :output-to "hello-express.js"
-                                 :output-dir "out/server"
-                                 :target :nodejs
-                                 :optimizations :simple
-                                 :pretty-print true}}]})
+  :cljsbuild
+    {:builds [{:id "dev"
+              :source-paths ["src/hello_express_clojurescript"]
+              :compiler {:language-in :ecmascript5-strict
+                         :language-out :ecmascript5-strict
+                         :output-to "hello-express.js"
+                         :output-dir "out/server-dev"
+                         :source-map "hello-express.js.map"
+                         :target :nodejs
+                         :optimizations :simple
+                         :pretty-print true}}
+              {:id "prod"
+               :source-paths ["src/hello_express_clojurescript"]
+               :compiler {:language-in :ecmascript5-strict
+                          :language-out :ecmascript5-strict
+                          :output-to "hello-express.min.js"
+                          :output-dir "out/server-prod"
+                          :source-map "hello-express.min.js.map"
+                          :target :nodejs
+                          :closure-warnings {:externs-validation :off
+                                             :non-standard-jsdoc :off}
+                          :externs
+                            ["node_modules/body-parser/index.js"
+                             "node_modules/express/lib/middleware/init.js"
+                             "node_modules/express/lib/middleware/query.js"
+                             "node_modules/express/lib/router/index.js"
+                             "node_modules/express/lib/router/layer.js"
+                             "node_modules/express/lib/router/route.js"
+                             "node_modules/express/lib/application.js"
+                             "node_modules/express/lib/express.js"
+                             "node_modules/express/lib/request.js"
+                             "node_modules/express/lib/response.js"
+                             "node_modules/express/lib/utils.js"
+                             "node_modules/express/lib/view.js"
+                             "externs/externs.js"]
+                          :optimizations :advanced
+                          :pretty-print true}}]})

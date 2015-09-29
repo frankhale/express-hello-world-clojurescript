@@ -4,5 +4,10 @@
 (def express (node/require "express"))
 (def router (.Router express))
 
-(.get router "/" (fn [req res next]
-  (.render res "index" #js { :title "Express from Clojurescript" })))
+(.get router "/"
+  (fn [req res next]
+    (.render res "index" #js { :title "Express from Clojurescript" })))
+
+(.get router "/test"
+  (fn [req res next]
+    (.render res "index" #js { :title "Just another route..." })))
