@@ -1,5 +1,6 @@
 (ns hello-express-clojurescript.core
   (:require [cljs.nodejs :as node]
+            [figwheel.client :as fw]
             [hello-express-clojurescript.views :as views]
             [hello-express-clojurescript.routes :as routes]))
 
@@ -11,9 +12,8 @@
 (def logger (node/require "morgan"))
 (def cookieParser (node/require "cookie-parser"))
 (def bodyParser (node/require "body-parser"))
-(def app (express))
 (def http (node/require "http"))
-(def server (.createServer http app))
+(def app (express))
 (def debug ((node/require "debug") "hello-express:server"))
 
 (defn normalizePort [val]
@@ -33,7 +33,7 @@
     (.use (logger "dev"))
     (.use (.json bodyParser))
     (.use (.urlencoded bodyParser #js { :extended false }))
-    (.use (.static express (.join path js/__dirname "public")))
+    (.use (.static express (.join path js/__dirname "../../../public")))
     (.use "/" routes/router)
     (.use (fn [req res next]
       (let [err (js/Error. "Not Found")]
@@ -59,18 +59,20 @@
         "EADDRINUSE" (fn []
           (js/console.error (str bind " is already in use")))))))
 
-(defn server-listening-handler []
+(defn server-listening-handler [e server]
    (let [addr (.address server)
-         bind (if (= (type addr) "string") (str "pipe" addr) (str "port" (.-port addr)))]
-     (debug (str "Listening on " bind))))
+         bind (if (= (type addr) "string") (str "pipe " addr) (str "port " (.-port addr)))]
+     (js/console.log (str "Express server listening on " bind))))
 
 (defn -main [& args]
-  (println (str "Starting up Express on http://localhost:" port))
   (setup-express-config)
   (setup-error-handler)
-  (-> server
-    (.listen port)
-    (.on "error" server-error-handler)
-    (.on "listening" server-listening-handler)))
+  (let [server (.createServer http #(app %1 %2))]
+    (-> server
+      (.on "error" server-error-handler)
+      (.on "listening" #(server-listening-handler % server))
+      (.listen port))))
 
 (set! *main-cli-fn* -main)
+
+(fw/start { })

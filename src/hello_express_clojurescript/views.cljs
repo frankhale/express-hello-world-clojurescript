@@ -3,8 +3,6 @@
   (:require [cljs.nodejs :as node]
             [hiccups.runtime :as hiccupsrt]))
 
-;(node/enable-util-print!)
-
 (hiccups/defhtml layout [title view]
   (html5
     [:head
