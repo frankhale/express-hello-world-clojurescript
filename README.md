@@ -13,9 +13,12 @@ I've changed how the node modules are installed and tracked. I'm using lein-npm
 now to manage that. You may need to run 'lein deps' in order to install these
 if you plan on running this code.
 
-Just one more thing, I'm using the handlebars templating engine for now but it'd
-be ideal to use something like hiccups but I don't know if that is compatible
-with Express.
+I've removed the the handlebars view engine and views and replaced it with
+hiccups. We have to use a custom compiled local copy because it contains
+features we need that have not been released yet. This choice was done because
+the maintainer of hiccups also announced that he is looking for a new maintainer
+so that likely means he is not likely to release the new features that were
+recently merged.
 
 Hiccups - https://github.com/teropa/hiccups
 
@@ -35,10 +38,29 @@ cause any problems.
 WARNING - Misplaced function annotation. This JSDoc is not attached to a function node. Are you missing parentheses?
 ```
 
+It looks like Clojurescript master can now support ecmascript 6 language-in and
+out features and I found a reference to this specific error and that we need to
+use that new feature. It hasn't been released yet and since this is just a
+warning I am not in a big hurry to use a custom compiled local copy of
+Clojurescript just to make the warnings go away.
+
+##Additional Notes
+
+A custom build of hiccups is being used and is pulled from the repo directory.
+
+If other custom dependencies are needed that are not in a maven repo online you
+can install them using the following command:
+
+Assumed maven is install and in path. Replace the name, version and file name accordingly.
+
+```
+mvn deploy:deploy-file -DgroupId=local -DartifactId=hiccups -Dversion=0.4.0-SNAPSHOT -Dpackaging=jar -Dfile=hiccups-0.4.0-SNAPSHOT.jar -Durl=file:repo
+```
+
 ## Author(s)
 
 Frank Hale &lt;frankhale@gmail.com&gt;  
-29 September 2015
+30 September 2015
 
 ## License
 
