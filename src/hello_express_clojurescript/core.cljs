@@ -1,5 +1,6 @@
 (ns hello-express-clojurescript.core
   (:require [cljs.nodejs :as node]
+            [hello-express-clojurescript.views :as views]
             [hello-express-clojurescript.routes :as routes]))
 
 (node/enable-util-print!)
@@ -29,8 +30,6 @@
 (defn setup-express-config []
   (-> app
     (.set "port" port)
-    (.set "views" (.join path js/__dirname "views"))
-    (.set "view engine" "hbs")
     (.use (logger "dev"))
     (.use (.json bodyParser))
     (.use (.urlencoded bodyParser #js { :extended false }))
@@ -47,9 +46,7 @@
           err-status (.-status err)
           err-message (.-message err)]
       (.status res (if-not (nil? err-status) err-status 500))
-      (.render res "error" #js {
-        :message err-message
-        :error (if dev? err #js {})})))))
+      (.send res (views/error err-message (when dev? err)))))))
 
 (defn server-error-handler [error]
   (if-not (= (.-syscall error) "listen")
